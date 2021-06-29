@@ -1,6 +1,5 @@
 from flask import Flask, request
-from flask.json import jsonify
-from flask_restful import Resource, Api, reqparse, abort
+from flask_restful import Resource, Api
 import constants
 from intervaltree import Interval, IntervalTree
 
@@ -10,11 +9,13 @@ api = Api(app)
 DISTANCE_INTERVAL = IntervalTree(
     Interval(start*1000, end*1000, data=data) for start, end, data in constants.DELIVERY_COST
 )
+
 class Order(Resource):
-    
+    """ Helper function to return response messages """
     def status_code(self, status_code=422, message="Unprocessable Entity"):
         return {"status_code": status_code, "message":message}
-
+    
+    """ Function to calculate total from input response """
     def calculate(self, response):
         total = 0
         try:
@@ -33,6 +34,7 @@ class Order(Resource):
             return self.status_code(status_code=500, message="Internal Server Error")
         return {"total":total}
 
+    """ Helper function for Input Response Validation """
     def validate_input(self, data):
         order_items = data['order_items']
         for order in order_items:
@@ -56,15 +58,17 @@ class Order(Resource):
 
         return   self.calculate(data)
 
+    """ Function for POST request to the server """
     def post(self):
         try:
+            ## Taking input from body of response (raw/json)
             req = request.get_json()
             print(req)
             return self.validate_input(req)       
         except Exception as e:
             return {"status_code":500, "message":str(e)}
 
-    ## Update API for configuring delivery slab
+    """ PUT API for configuring delivery slab """
     def put(self):
         """
         { 
