@@ -63,18 +63,12 @@ class Order(Resource):
         try:
             ## Taking input from body of response (raw/json)
             req = request.get_json()
-            print(req)
             return self.validate_input(req)       
         except Exception as e:
             return {"status_code":500, "message":str(e)}
 
     """ PUT API for configuring delivery slab """
     def put(self):
-        """
-        { 
-        "delivery_cost": [[0,10, 50], [10, 20, 100], [20, 50, 50], [50, 100, 1000]]
-        }
-        """
         try:
             req = request.get_json()
             distance_intervals = req["delivery_cost"]

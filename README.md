@@ -10,7 +10,7 @@
 ## USAGE
 ### POST Request for order total
 - Send a POST request to `http://localhost:5000/` with a body:
-````
+````json
 {
   "order_items": [
     {
@@ -32,20 +32,20 @@
 }
 ````
 - Response:
-````
+````json
 {
     "total": 14300
 }
 ````
 ### PUT Api for updating Delivery Slab
 - Request PUT with a body:
-````
+````json
  { 
         "delivery_cost": [[0,10, 50], [10, 20, 100], [20, 50, 50], [50, 100, 1000]]
  }
  ````
 - Response
-````
+````json
 {
     "status_code": 200,
     "message": "Updated Successfully"
