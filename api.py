@@ -6,11 +6,12 @@ from intervaltree import Interval, IntervalTree
 
 app = Flask(__name__)
 api = Api(app)
-
+## Initial delivery slab 
 DISTANCE_INTERVAL = IntervalTree(
-    Interval(start, end, data=data) for start, end, data in constants.DELIVERY_COST
+    Interval(start*1000, end*1000, data=data) for start, end, data in constants.DELIVERY_COST
 )
 class Order(Resource):
+    
     def status_code(self, status_code=422, message="Unprocessable Entity"):
         return {"status_code": status_code, "message":message}
 
@@ -18,10 +19,16 @@ class Order(Resource):
         total = 0
         try:
             for order in response["order_items"]:
-                total += order["price"]
+                total += order["price"]*order["quantity"]
             ## Getting delivery cost according to the distance in paisa
             delivery_cost = sorted(DISTANCE_INTERVAL[response["distance"]])[0].data * 100
-            
+            discount = 0
+            if "offer" in response:
+                if response["offer"]["offer_type"].lower() == "delivery":
+                    discount = delivery_cost
+                elif response["offer"]["offer_type"].lower() == "flat":
+                    discount = min(total, response["offer"]["offer_val"])
+            total += delivery_cost - discount
         except Exception as e:
             return self.status_code(status_code=500, message="Internal Server Error")
         return {"total":total}
@@ -76,6 +83,7 @@ class Order(Resource):
             return self.status_code(status_code=500, message="Incorrect input, Error-> " + str(e))
 
         return self.status_code(status_code=200, message="Updated Successfully")
+
 
 api.add_resource(Order, '/')
 
